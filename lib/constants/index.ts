@@ -4,3 +4,5 @@ export const APP_DESCRIPTION =
   "Prostore is a modern e-commerce platform built with Next.js and Firebase.";
 export const SERVER_URL =
   process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:3000";
+export const LATEST_PRODUCTS_LIMIT =
+  Number(process.env.NEXT_PUBLIC_LATEST_PRODUCTS_LIMIT) || 4;
