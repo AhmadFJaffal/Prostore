@@ -72,6 +72,7 @@ export const config = {
       // assign user fields to token
       if (user) {
         token.role = user.role;
+        token.id = user.id;
         if (user.name === "No_Name") {
           token.name = user.email.split("@")[0];
 
@@ -81,12 +82,60 @@ export const config = {
             data: { name: token.name },
           });
         }
+
+        if (trigger === "signIn" || trigger === "signUp") {
+          const cookiesObject = await cookies();
+          const sessionCartId = cookiesObject.get("sessionCartId")?.value;
+
+          // check for session cart id
+          if (sessionCartId) {
+            // find cart by session cart id
+            const cart = await prisma.cart.findFirst({
+              where: {
+                sessionCartId,
+              },
+            });
+
+            // if cart exists
+            if (cart) {
+              // delete all carts with the user id
+              await prisma.cart.deleteMany({
+                where: { userId: user.id },
+              });
+
+              // assign new cart with user id
+              await prisma.cart.update({
+                where: { id: cart.id },
+                data: {
+                  userId: user.id,
+                },
+              });
+            }
+          }
+        }
       }
       return token;
     },
     authorized({ request, auth }: any) {
-      // check for session cart cookie
+      // array of regex for public routes
+      const protectedPaths = [
+        /\/shipping-address/,
+        /\/payment-method/,
+        /\/place-order/,
+        /\/profile/,
+        /\/user\/(.*)/,
+        /\/order\/(.*)/,
+        /\/admin\/(.*)/,
+      ];
+
+      // get path from request
+      const { pathname } = request.nextUrl;
+
+      // check if user is not authenticated
+      if (!auth && protectedPaths.some((path) => path.test(pathname)))
+        return false;
       if (!request.cookies.get("sessionCartId")) {
+        // check for session cart cookie
         // generate a new session cart id
         const sessionCartId = crypto.randomUUID();
 

@@ -20,6 +20,8 @@ const ProductDetailsPage = async (props: {
 
   const cart = await getMyCart();
 
+  console.log("cart", cart);
+
   return (
     <section>
       <div className="grid grid-cols-1 md:grid-cols-5">
