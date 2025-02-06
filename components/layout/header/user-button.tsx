@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { auth } from "@/auth";
-import { signOut } from "@/auth";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
