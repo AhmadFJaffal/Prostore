@@ -3,9 +3,8 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "./db/prisma";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { compareSync } from "bcrypt-ts-edge";
-import type { NextAuthConfig } from "next-auth";
 import { cookies } from "next/headers";
-import { NextResponse } from "next/server";
+import { authConfig } from "./auth.config";
 
 export const config = {
   pages: {
@@ -13,7 +12,7 @@ export const config = {
     error: "/sign-in",
   },
   session: {
-    strategy: "jwt",
+    strategy: "jwt" as const,
     maxAge: 30 * 24 * 60 * 60,
   },
   adapter: PrismaAdapter(prisma),
@@ -55,6 +54,7 @@ export const config = {
     }),
   ],
   callbacks: {
+    ...authConfig.callbacks,
     async session({ session, user, trigger, token }: any) {
       // set user id from token
       session.user.id = token.sub;
@@ -116,49 +116,8 @@ export const config = {
       }
       return token;
     },
-    authorized({ request, auth }: any) {
-      // array of regex for public routes
-      const protectedPaths = [
-        /\/shipping-address/,
-        /\/payment-method/,
-        /\/place-order/,
-        /\/profile/,
-        /\/user\/(.*)/,
-        /\/order\/(.*)/,
-        /\/admin\/(.*)/,
-      ];
-
-      // get path from request
-      const { pathname } = request.nextUrl;
-
-      // check if user is not authenticated
-      if (!auth && protectedPaths.some((path) => path.test(pathname)))
-        return false;
-      if (!request.cookies.get("sessionCartId")) {
-        // check for session cart cookie
-        // generate a new session cart id
-        const sessionCartId = crypto.randomUUID();
-
-        // clone request headers
-        const headers = new Headers(request.headers);
-
-        // create a new response
-        const response = NextResponse.next({
-          request: {
-            headers: headers,
-          },
-        });
-
-        // set new session cart cookie in response
-        response.cookies.set("sessionCartId", sessionCartId);
-
-        return response;
-      } else {
-        return true;
-      }
-    },
   },
   secret: process.env.NEXTAUTH_SECRET,
-} satisfies NextAuthConfig;
+};
 
 export const { handlers, auth, signIn, signOut } = NextAuth(config);
