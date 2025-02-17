@@ -198,3 +198,38 @@ export async function updateUserPaymentMethod(
     };
   }
 }
+
+export async function updateUserProfile(name: string) {
+  try {
+    const session = await auth();
+
+    const user = await prisma.user.findFirst({
+      where: {
+        id: session?.user?.id,
+      },
+    });
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    await prisma.user.update({
+      where: {
+        id: user.id,
+      },
+      data: {
+        name: name,
+      },
+    });
+
+    return {
+      success: true,
+      message: "User Profile updated successfully",
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: formatError(error),
+    };
+  }
+}

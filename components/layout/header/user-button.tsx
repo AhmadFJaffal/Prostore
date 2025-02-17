@@ -50,6 +50,29 @@ const UserButton = async () => {
               </div>
             </div>
           </DropdownMenuLabel>
+
+          <DropdownMenuItem className="p-0 mb-1">
+            <Link href="/user/profile" className="w-full">
+              <Button
+                variant="ghost"
+                className="w-full py-4 px-2 h-4 justify-start"
+              >
+                Profile
+              </Button>
+            </Link>
+          </DropdownMenuItem>
+
+          <DropdownMenuItem className="p-0 mb-1">
+            <Link href="/user/orders" className="w-full">
+              <Button
+                variant="ghost"
+                className="w-full py-4 px-2 h-4 justify-start"
+              >
+                Order History
+              </Button>
+            </Link>
+          </DropdownMenuItem>
+
           <DropdownMenuItem className="p-0 mb-1">
             <form action={signOutUser} className="w-full">
               <Button
